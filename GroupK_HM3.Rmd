@@ -1,11 +1,18 @@
 ---
 title: "GroupK_HM3"
 author: "L.Pernice, E.Ruoppolo, M.Tallone, A.Valentinis"
-output: 
-  pdf_document:
-    toc: true
-    toc_depth: 3
 date: "2022-11-20"
+output:
+  html_document:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +29,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Ex 6.14
 
-*The data set ``Crabs2`` at the book’s website comes from a study of factors that affect sperm traits of male horseshoe crabs. A response variable, SpermTotal, is the log of the total number of sperm in an ejaculate. It has $\bar{y}= 19.3$ and $s = 2.0$. The two explanatory variables used in the `R` output are the horseshoe crab’s carapace width (CW, mean $18.6\,cm$, standard deviation $3.0\,cm$), which is a measure of its size, and color (1=dark, 2=medium, 3=light), which is a measure of adult age, darker ones being older.*
+*The data set ``Crabs2`` at the book’s website comes from a study of factors that affect sperm traits of male horseshoe crabs. A response variable, SpermTotal, is the log of the total number of sperm in an ejaculate. It has $\bar{y}= 19.3$ and $s = 2.0$. The two explanatory variables used in the `R` output are the horseshoe crab’s carapace width (CW, mean $18.6\,cm$, standard deviation $3.0\,cm$), which is a measure of its size, and color (1=dark, 2=medium, 3=light), which is a measure of adult age, darker ones being older.\
+```{r}
+Crabs2=read.table("data/Crabs2.dat", header = T)
+summary(lm(SpermTotal ~ CW + factor(Color), data=Crabs2))
+library(car)
+Anova(lm(SpermTotal ~ CW + factor(Color) + CW:factor(Color), data=Crabs2))
+```
+
+(a) Using the results shown, write the prediction equation and interpret the parameter esti-
+mates.\
+(b) Explain the differences in what is tested with the F statistic (i) for the overall model, (ii)
+for the factor(Color) effect, (iii) for the interaction term. Interpret each.*
 
 **Solution**
 
@@ -92,11 +110,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Ex 6
 
-*Sugar content in cereal is monitored in two ways: a lengthy lab analysis and by using quick, inexpensive high performance liquid chromatography. The data in ``frostedflakes`` (DAAG) come from 101 daily samples of measurements taken using the two methods.*
-
-(a)   *Obtain a vector of differences between the pairs of measurements.*
-(b)   *Plot the sample autocorrelation function of the vector of differences. Would an MA(1) model be more realistic than independence?*
-(c)   *Compute a confidence interval for the mean difference under the independence assumption and under the MA(1) assumption.*
+*As in the previous exercise, the function poissonsim() allows for experimentation with
+Poisson regression. In particular, poissonsim() can be used to simulate Poisson responses
+with log-rates equal to a + bx, where a and b are fixed values by default.\
+(a) Simulate 100 Poisson responses using the model $$log \lambda = 2 − 4x$$\
+for x = 0, 0.01, 0.02 ..., 1.0. Fit a Poisson regression model to these data, and compare the
+estimated coefficients with the true coefficients. How well does the estimated model predict
+future observations?\
+(b) Simulate 100 Poisson responses using the model $$log \lambda = 2 − bx$$
+where b is normally distributed with mean 4 and standard deviation 5. [Use the argument
+slope.sd=5 in the poissonsim() function] How do the results using the poisson
+and quasipoisson families differ?*
 
 
 **Solution**
