@@ -50,6 +50,30 @@ for the factor(Color) effect, (iii) for the interaction term. Interpret each.*
 
 **Solution**
 
+For simplicity we can consider only the case $c>0$.
+Let's call $z_i = c y_i$ for the sake of clarity.
+We can, then calculate $s_z = s_{cy}$
+\[
+\begin{split}
+s_z &= \sqrt{\frac{1}{n-1} \sum_{i=1}^n (z_i - \bar z)^2}= \sqrt{\frac{1}{n-1} \sum_{i=1}^n (cy_i - \bar {cy_i})^2}=\\
+&= \sqrt{\frac{1}{n-1} \sum_{i=1}^n (cy_i - c\bar {y_i})^2}= \sqrt{\frac{c^2}{n-1} \sum_{i=1}^n (y_i - \bar {y_i})^2}=\\
+&= c\sqrt{\frac{1}{n-1} \sum_{i=1}^n (y_i - \bar {y_i})^2}= c s_y
+\end{split}
+\]
+
+Let's now consider $\hat{\beta_1}'$ as the *slope* coefficient related to the response variables $z_i$.
+\[
+\begin{split}
+\hat{\beta_1}' &= \frac{\sum_i (x_i -\bar x)(z_i -\bar z)}{\sum_i(x_i-\hat x)^2} = \frac{\sum_i (x_i -\bar x)(cy_i -\bar {cy_i})}{\sum_i(x_i-\hat x)^2} =\\
+&= c \frac{\sum_i (x_i -\bar x)(y_i -\bar {y_i})}{\sum_i(x_i-\hat x)^2} = c \hat{\beta_1}
+\end{split}
+\]
+
+Given these results, we can state that the quantity $r=\hat{\beta_1}\left(\frac{s_x}{s_y}\right)$ doesn't depend on the units of measurement, as
+\[
+r_z = \hat{\beta_1}' \frac{s_x}{s_z} = c \hat{\beta_1} \frac{s_x}{c s_y} = \hat{\beta_1} \frac{s_x}{s_y} = r_y
+\]
+
 ### Ex 6.42
 
 *You can fit the quadratic equation $\text{E}(Y)=\beta_0+\beta_1x+\beta_2x^2$ by fitting a multiple regression model with $x_1=x$ and $x_2=x^2$*.
