@@ -50,7 +50,7 @@ for the factor(Color) effect, (iii) for the interaction term. Interpret each.*
 
 **Solution**
 
-For simplicity we can consider only the case $c>0$.
+For simplicity we can consider two separate cases, for $c>0$ and $c <0$. Let's first consider the case $c>0$.
 Let's call $z_i = c y_i$ for the sake of clarity.
 We can, then calculate $s_z = s_{cy}$
 \[
@@ -73,6 +73,11 @@ Given these results, we can state that the quantity $r=\hat{\beta_1}\left(\frac{
 \[
 r_z = \hat{\beta_1}' \frac{s_x}{s_z} = c \hat{\beta_1} \frac{s_x}{c s_y} = \hat{\beta_1} \frac{s_x}{s_y} = r_y
 \]
+
+Now, if $c<0$, we obtain, doing the same calculations, that $$s_z = |c| s_y$$, and, at the same time $$\hat\beta_1' = c \hat\beta_1$$.
+
+So, When $c<0$, both $s_y$ and $\hat\beta_1$ preserve their magnitude, but the negative sign of $c$ leads to a negative scaling of the slope coefficient.
+Despite this, the coefficient $r=\hat\beta_1 \left(\frac{s_x}{s_y}\right)$ remains unchanged.
 
 ### Ex 6.42
 
