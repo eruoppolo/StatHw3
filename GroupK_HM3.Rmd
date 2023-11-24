@@ -129,6 +129,79 @@ Despite this, the coefficient $r=\hat\beta_1 \left(\frac{s_x}{s_y}\right)$ remai
 
 **Solution**
 
+(a)
+
+```{r}
+crabs = read.table("data/Crabs.dat", header=T)
+main_model = glm(y ~ weight + factor(color), data=crabs, family=binomial)
+summary(main_model)
+```
+In this case we can say that none of the colors in the dataset show a statistical significance at a typical significance level ($\alpha = 0.05$). In fact, as their p-value is greater than this significance level, this shows weak evidence against the null hypothesis of $\hat\beta_j = 0$. So, we can say that there is insufficient evidence to conclude that any level of the covariate *color* affects the response variable $y$.
+
+```{r}
+# Confidence interval for weight effect
+coef_weight <- coef(main_model)["weight"]
+se_weight <- summary(main_model)$coefficients["weight", "Std. Error"]
+z_value <- qnorm(0.975)
+ci_lower <- coef_weight - z_value * se_weight
+ci_upper <- coef_weight + z_value * se_weight
+cat("Confidence Interval for the effect of weight: (", ci_lower, ",", ci_upper, ")\n")
+```
+
+(b)
+```{r}
+# Fit the model with interaction
+interaction_model <- glm(y ~ weight * factor(color), data = crabs, family = binomial)
+summary(interaction_model)
+
+# Compare models using likelihood ratio test
+anova(main_model, interaction_model, test = "Chisq")
+
+```
+As we can see, although looking at the only AIC value would suggest taking the model with interaction as a better one, looking at the p-value of the chi-squared statistics calculated upon the deviances, we can see that we don't have a significant improvement in the model, even considering the interaction factor. This suggests us to stick with the simpler model without interaction.
+
+(c)
+```{r}
+#Model with interaction
+interaction_model <- glm(y ~ weight * factor(color), data = crabs, family = binomial)
+AIC_interaction <- AIC(interaction_model)
+
+#Model without interaction
+main_model <- glm(y ~ weight + factor(color), data = crabs, family = binomial)
+AIC_main <- AIC(main_model)
+
+#Model with only weight
+weight_model <- glm(y ~ weight, data = crabs, family = binomial)
+AIC_weight <- AIC(weight_model)
+
+#Model with only color
+color_model <- glm(y ~ factor(color), data = crabs, family = binomial)
+AIC_color <- AIC(color_model)
+
+#Null model
+null_model <- glm(y ~ 1, data = crabs, family = binomial)
+AIC_null <- AIC(null_model)
+
+#AIC comperison
+AIC_values <- c("Interaction" = AIC_interaction, 
+                "Main Effects" = AIC_main, 
+                "Weight Only" = AIC_weight, 
+                "Color Only" = AIC_color, 
+                "Null Model" = AIC_null)
+
+AIC_values
+
+```
+Looking at only the AIC value, the model that seems best fit on the data is the one considering the interaction between *weight* and *color* covariates. So it seems to be the best balance between goodness of fit and complexity.
+
+The second one in this list is the one that considers the simple interaction between *weight* and *color*, that has a slightly lower AIC index. This suggests that considering *weight* and *color* ad main effect without considering their interaction provides a reasonably good fit, too, while being less complex.
+
+Also the model considering the *wieght* parameter as only covariate seems to have the same explanation.
+
+The remaining two models have higher AIC, and considering they are simpler models, they suggest poorer fit of the data.
+
+So considering the AIC index, the most sensible choice appears to be the one including the interaction between covariates, closely followed by the model without interaction.
+
 ### Ex 7.26
 
 *A headline in ``The Gainesville Sun (Feb. 17, 2014)`` proclaimed a worrisome spike in shark attacks in the previous two years. The reported total number of shark attacks in Florida per year from 2001 to 2013 were 33, 29, 29, 12, 17, 21, 31, 28, 19, 14, 11, 26, 23. Are these counts consistent with a null Poisson model? Explain, and compare aspects of the Poisson model and negative binomial model fits.*
