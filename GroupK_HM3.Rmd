@@ -27,6 +27,90 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Solution**
 
+Fist of all, we can load the necessary dataset from the book's website with the packages later used in the analysis.
+
+```{r, include=FALSE}
+library(ellipse)
+library(PerformanceAnalytics)
+library(car)
+un <- read.table("https://stat4ds.rwth-aachen.de/data/UN.dat", header=TRUE)
+```
+
+Then it's good practice to explore the data with the ``head()`` and the ``summary()`` functions.
+
+```{r}
+head(un)
+```
+
+```{r}
+summary(un)
+```
+
+It's now possible to see that the "UN" dataset contains information on 42 different states. The objective is to build a model capable of predicting the response variable ``Internet``, which represents the percentage of people using internet in a given nation, using the other variables as covariates.\
+Here is a brief description of the other variables present in the dataset:\
+
+- ``Nation``: a list containing the names of the nations where the data were collected
+
+- ``GDP``: per capita gross domestic product (in thousands of dollars)\
+
+- ``HDI``: it's a human development index, which has components referring to life expectancy at birth, educational attainment, and income per capita.\
+
+- ``GII``: a gender inequality index, a composite measure reflecting inequality in achievement between women and men in reproductive health, empowerment, and the labor market.\
+
+- ``Fertility``: fertility rate (number of births per woman)\
+
+- ``CO2``: carbon dioxide emissions per capita (in metric tons)\
+
+- ``Homicide``: a homicide rate (number of homicides per 100,000 people)\
+
+- ``Prison``: prison population (per 100,000 people)\
+
+The first thing to notice is that the categorical variable ``Nation`` is not relevant for our model so we can drop it in order to conduct the analysis.
+At the same time, for clarity purposes, we can assign meaningful names to the other columns.
+
+```{r}
+un <- subset(un, select = -c(Nation))
+colnames(un) <- c("GDP", "HDI", "GII", "Fertility", "CO2", "Homicide", "Prison", "Internet")
+```
+
+As suggested from the exercise instruction, we can then try to build a multiple regression model to predict ``Internet`` using all the remaining as covariates. In other words, we need to estimate the coefficients $\beta_0, \beta_1, \dots, \beta_7$ for which:\
+$$
+(Internet)_i = \beta_0 + \beta_{1} \cdot (GDP)_i + \beta_{2} \cdot (HDI)_i + \beta_{3} \cdot (GII)_i + \beta_{4} \cdot (Fertility)_i + \beta_{5} \cdot (CO2)_i + \beta_{6} \cdot (Homicide)_i + \beta_{7} \cdot (Prison)_i + \epsilon_i
+$$
+
+Where $\epsilon_i \sim N(0, \sigma^2), \forall i=1,\dots,42$.\
+This can be easily doe using the ``lm()`` function in R. We can build an object ``m2`` that represents our model and inspect its characteristics using the ``summary()`` function.
+```{r}
+m2 <- lm(Internet ~ ., data = un)
+summary(m2)
+```
+
+From this first analysis we can quickly notice that, even if the adjusted $R^2=0.8164$, the estimated standard error for some of the parameters is very high, which is a sign of possible correlation between variables.\
+To verify his we can visualize the scatterplot matrix for this dataset:
+
+```{r}
+chart.Correlation(un)
+```
+
+From the obtained plot we can indeed conclude that there is a high correlation between the first 3 variables and the response variable we're trying to predict. This correlation might be the possible source of uncertainty in the previous model.\
+We can further investigate on this by computing the VIF in the following way:
+```{r}
+vif(m2)
+```
+
+The outcome of this computation seems to confirm out previous observation. Even if the VIF of the variables ``GDP`` and ``GII`` does not reach the usual threshold $10$ as the one for ``HDI`` does, it is still a sign of multicollinearity between the covariates.
+
+The other thing we can notice is that the variables ``Homicide``, ``Prison`` and (to some extent) ``Fertility`` are not strictly correlated to the response variable.\
+As the exercise suggest we can therefore repeat the fitting process using only the variable ``GDP`` as covariate.
+
+```{r}
+m1 <- lm(Internet ~ GDP, data = un)
+summary(m1)
+```
+
+The resultant $R^2=0.7637$ of this fit is not far from the one obtained in the previous model. This is a consequence of the high correlation we've previously discussed. In fact, by definition, the adjusted $R^2$ penalizes the introduction of variables that are not significant in further explaining the model, which in this case are the variables ``HDI`` and ``GII`` due to their strong correlation to the ``GDP`` one.\
+Moreover, it is possible to notice is that the $\hat\beta_1$ coefficient for the ``GDP`` variable estimated in the second model (``m1``) is greater that the one found in the first one. This is most probably another result of the multicollinearity problem related to the fact the the variables which are highly correlated with the ``GDP`` tend to "mask" the real effect of the latter in the full model (``m2``).
+
 ### Ex 6.14
 
 *The data set ``Crabs2`` at the book’s website comes from a study of factors that affect sperm traits of male horseshoe crabs. A response variable, SpermTotal, is the log of the total number of sperm in an ejaculate. It has $\bar{y}= 19.3$ and $s = 2.0$. The two explanatory variables used in the `R` output are the horseshoe crab’s carapace width (CW, mean $18.6\,cm$, standard deviation $3.0\,cm$), which is a measure of its size, and color (1=dark, 2=medium, 3=light), which is a measure of adult age, darker ones being older.\
@@ -98,6 +182,50 @@ Despite this, the coefficient $r=\hat\beta_1 \left(\frac{s_x}{s_y}\right)$ remai
 (b) *Show that for comparing nested linear models,* $$ F=\frac{(SSE_0-SSE_1)/(p_1-p_0)}{SSE_1/[n-(p_1+1)]} =\frac{(R_1^2-R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]}$$
 
 **Solution**
+
+(a) Starting form the definition of the $R^2$ coefficient:
+
+$$
+R^2 = \frac{SSR}{TSS} = 1 - \frac{SSE}{TSS}
+$$
+We can show that by substituting it into the second expression it is possible to obtain the first one.
+
+$$
+\begin{aligned}
+F &= \frac{R^2 / p}{(1-R^2) / [n-(p-1)]} = \frac{[n-(p-1)]}{p} \cdot \frac{R^2}{(1-R^2)} = \\
+&= \frac{[n-(p-1)]}{p} \cdot \left( 1 - \frac{SSE}{TSS} \right) \cdot \frac{1}{1 - 1 + \frac{SSE}{TSS}} = \\
+&= \frac{[n-(p-1)]}{p} \cdot \frac{TSS - SSE}{TSS} \cdot \frac{TSS}{SSE} = \\
+&= \frac{[n-(p-1)]}{p} \cdot \frac{TSS - SSE}{SSE} = \\
+&= \frac{(TSS-SSE)/p}{SSE/[n-(p+1)]}
+\end{aligned}
+$$
+
+which is exactly the initial expression as we expected.
+
+The $R^2$ coefficient varies in the range $[0,1]$ and it's connected to the variability explained by the model. Values of the $R^2$ closer to one suggest that the model greatly fit the data, while lower values mean that a give model does not fit the data well enough. The F-statistics, on the other hand, is defined as the ratio between the explained variability of the data, represented by the $R^2$ itself, and the unexplained variability, given by $1-R^2$. This means that in a F-test, the greater the value of $F$, the better the model fits the data. In other words, if we find big values for the $R^2$, then the corresponding F statistic should be large since there should be strong evidence that at least some of the coefficients used in the model are significantly different than zero.
+
+(b) Using the same procedure we can verify that the 2 expression are equivalent even in this case. By definition we know that:
+
+$$
+R^2_0 = \frac{SSR_0}{TSS} = 1 - \frac{SSE_0}{TSS}
+\quad{\;\;\;}\quad
+R^2_1 = \frac{SSR_1}{TSS} = 1 - \frac{SSE_1}{TSS}
+$$
+
+Note that $TSS = \sum_{i=1}^n(y_i-\bar{y})^2$ is the same for both models, since by definition it does not depend on the chosen model.\
+Substituting these definition in the second expression we find that:
+
+$$
+\begin{aligned}
+F &= \frac{(R_1^2-R_0^2)/(p_1-p_0)}{(1-R_1^2)/[n-(p_1+1)]} = \frac{[n-(p_1+1)}{p_1-p_0} \cdot \frac{R_1^2-R_0^2}{(1-R_1^2)} = \\
+&= \frac{[n-(p_1+1)]}{p_1-p_0} \cdot \left( 1- \frac{SSE_1}{TSS} -1 + \frac{SSE_0}{TSS} \right) \cdot \left( \frac{1}{1 - 1 + \frac{SSE_1}{TSS}} \right) = \\
+&= \frac{[n-(p_1+1)]}{p_1-p_0} \cdot \frac{SSE_0 - SSE_1}{TSS} \cdot \frac{TSS}{SSE_1} = \\
+&= \frac{[n-(p_1+1)]}{p_1-p_0} \cdot \frac{SSE_0 - SSE_1}{SSE_1} = \\
+&=\frac{(SSE_0-SSE_1)/(p_1-p_0)}{SSE_1/[n-(p_1+1)]}
+\end{aligned}
+$$
+
+which is exactly the first expression as we expected.
 
 ## FSDS - Chapter 7
 
@@ -212,8 +340,8 @@ So considering the AIC index, the most sensible choice appears to be the one inc
 
 ### Ex 6
 
-*As in the previous exercise, the function poissonsim() allows for experimentation with
-Poisson regression. In particular, poissonsim() can be used to simulate Poisson responses
+*As in the previous exercise, the function ``poissonsim()`` allows for experimentation with
+Poisson regression. In particular, ``poissonsim()`` can be used to simulate Poisson responses
 with log-rates equal to a + bx, where a and b are fixed values by default.\
 (a) Simulate 100 Poisson responses using the model $$log \lambda = 2 − 4x$$\
 for x = 0, 0.01, 0.02 ..., 1.0. Fit a Poisson regression model to these data, and compare the
@@ -221,8 +349,71 @@ estimated coefficients with the true coefficients. How well does the estimated m
 future observations?\
 (b) Simulate 100 Poisson responses using the model $$log \lambda = 2 − bx$$
 where b is normally distributed with mean 4 and standard deviation 5. [Use the argument
-slope.sd=5 in the poissonsim() function] How do the results using the poisson
-and quasipoisson families differ?*
+slope.sd=5 in the `poissonsim()`` function] How do the results using the poisson
+and ``quasipoisson`` families differ?*
 
 
 **Solution**
+
+(a) We can first simulate a sequence of 100 Poisson responses that respect the given model using the ``poissonsim()`` function in this way:
+
+```{r}
+library(DAAG)
+x_sim <- seq(0.0,1.0,0.01)
+data_sim <- poissonsim(x_sim, 2, -4) 
+```
+
+The, for the sake of clarity, if we label with $x$ the covariates and with $y$ the responses, we can perform a fit using the ``glm()`` command with the Poisson family.
+
+```{r}
+x <- data_sim[,1]
+y <- data_sim[,2]
+
+pois_fit <- glm(y~x, family = poisson(link=log))
+summary(pois_fit)
+```
+
+We can therefore see that the value obtained for the estimated parameters is very close to the actual ones, with a small standard error. The small p-values obtained for both the parameters also allow us to reject the hypothesis that the parameters are equal to zero.
+
+*...I should add some comments on the deviances and AIC which is very high...*
+
+(b) If the parameter b is now normally distributed with mean 4 and standard deviation 5 we can simulate the data in a similar way using the suggested argument for the ``poissonsim()`` function.
+
+```{r}
+x_sim <- seq(0.0,1.0,0.01)
+data_sim <- poissonsim(x_sim, 2, -4, slope.sd=5) 
+```
+
+Just as done before we can assign better names to the variables and fit the data first using the poisson family and then the quasipoisson:
+
+```{r}
+x <- data_sim[,1]
+y <- data_sim[,2]
+pois_fit <- glm(y~x, family = poisson(link=log))
+quasipois_fit <- glm(y~x, family = quasipoisson(link=log))
+
+summary(pois_fit)
+```
+```{r}
+summary(quasipois_fit)
+```
+
+We can see that for both families the estimated values for the parameters are exactly the same just as we would expect since the estimating equations do not change from one to the other. However, the standard error for the parameters is different since in the quasipoisson method, in order to deal with the overdispersion of the data, the variance of the response variable is modeled as $var(Y_i) = \phi var(\mu_i)$ and a value different from $1$ is estimated for $\phi$ unlike in the first case.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
