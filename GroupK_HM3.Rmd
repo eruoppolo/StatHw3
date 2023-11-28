@@ -128,6 +128,54 @@ for the factor(Color) effect, (iii) for the interaction term. Interpret each.*
 
 **Solution**
 
+
+a.    Using the summary results we can write the equation:
+$$ E(Y_i)=11.36+0.39\times CW_i+0.81\times C2_{i}+1.15\times C3_{i}$$
+where $C2_{i}=\text{Color } 2\,(1=\text{yes},0=\text{no})$, $C3_{i}=\text{Color } 3\,(1=\text{yes},0=\text{no})$. 
+In this way we categorized the three different colors fitting three lines, each for a different color of the crab. Each line intercept changes with respect to the color, while the slope is the same. 
+The coefficient $\hat{\beta_2}=0.81$ then indicates the difference between the estimated mean value of $SpermTotal$ for Color2 and Color1 crabs, adjusting for carapace width. The same in the case of $\hat{\beta}_3$ but for Color3 and Color1 crabs. Finally for Color3 and Color2 this difference is $\hat{\beta}_3-\hat{\beta}_2=0.34$.
+
+To visualize this:
+```{r}
+plot(Crabs2$CW, Crabs2$SpermTotal, col=11.5*Crabs2$Color, pch=(14+Crabs2$Color), xlab = "CW", ylab="SpermTotal")
+mod <- lm(SpermTotal ~ CW + factor(Color), data=Crabs2)
+b0hat <- coefficients(mod)[1]
+b1hat <- coefficients(mod)[2]
+b2hat <- coefficients(mod)[3]
+b3hat <- coefficients(mod)[4]
+abline(b0hat,b1hat, col = 11.5, lwd=4)
+abline(b0hat+b2hat,b1hat, col = 23, lwd=4)
+abline(b0hat+b3hat, b1hat, col =34.5, lwd=4)
+legend(x=12,y=25,c("Color1","Color2", "Color3"),cex=.8,col=c(11.5,23,34.5),pch=c(15,16,17))
+```
+
+b. Here we can compare three different models:
+
+-   the first that only uses the carapace width of the crabs to explain the $SpermTotal$ variable;
+-   the second that takes into account a possible effect of the color (hence the age) of the crabs in order to explain the response variable, considering three different groups and regression lines that differs only for their intercept, as we have already seen;
+-   the third that considers, by adding the interaction term, that the effect of the variable $CW$ is not the same for the different Color categories. In this way the three regression lines have each a different intercept and a different slope. We can show this in the following plot: 
+
+```{r}
+mod1 <- lm(SpermTotal ~ CW + factor(Color) + CW:factor(Color), data=Crabs2)
+b0tilde <- coefficients(mod1)[1]
+b1tilde <- coefficients(mod1)[2]
+b2tilde <- coefficients(mod1)[3]
+b3tilde <- coefficients(mod1)[4]
+b4tilde <- coefficients(mod1)[5]
+b5tilde <- coefficients(mod1)[6]
+plot(Crabs2$CW, Crabs2$SpermTotal, col=11.5*Crabs2$Color, pch=(14+Crabs2$Color), xlab = "CW", ylab="SpermTotal")
+abline(b0tilde,b1tilde, col = 11.5, lwd=4)
+abline(b0tilde+b2tilde,b1tilde+b4tilde, col = 23, lwd=4)
+abline(b0tilde+b3tilde, b1tilde+b5tilde, col =34.5, lwd=4)
+legend(x=12,y=25,c("Color1","Color2", "Color3"),cex=.8,col=c(11.5,23,34.5),pch=c(15,16,17))
+```
+
+Evaluating the results of the table we can affirm, looking at the $p-$values, that:
+
+- the overall model is better than a null model, having it a very small $p-$value;
+- the factor(Color) has a significant effect, indeed the $p-$value is sufficiently small to suggest us to accept the model with this factor;
+- the interaction model does not add significant information, because $p\simeq0.22$ is large enough to allow us to ignore it and keep a simpler model.
+
 ### Ex 6.30
 
 *When the values of $y$ are multiplied by a constant $c$, from their formulas, show that $s_y$ and $\hat{\beta}_1$ in the bivariate linear model are also then multiplied by $c$. Thus, show that $r =\hat{\beta}_1(s_x/s_y)$ does not depend on the units of measurement.*
@@ -234,6 +282,44 @@ which is exactly the first expression as we expected.
 *Analogously to the previous exercise, randomly sample 30 X observations from a uniform in the interval $(-4,4)$ and conditional on $X= x$, 30 normal observations with $\text{E}(Y)=3.5x^3-20x^2+0.5x+20$ and $\sigma = 30$. Fit polynomial normal GLMs of lower and higher order than that of the true relationship. Which model would you suggest? Repeat the same task for $\text{E}(Y)=0.5x^3- 20x^2+0.5x+20$ (same $\sigma$) several times. What do you observe? Which model would you suggest now?*
 
 **Solution**
+
+First let's generate the random sample of observations, the gaussian errors as stochastic part of the response variable, gaussian because of dealing with a polynomial normal, and the response variables:
+```{r}
+X <- runif(30, min=-4, max=4)
+Y <- 3.5*X^3-20*X^2+0.5*X+20
+e <- rnorm(30, mean = 0, sd=30)
+y <- Y + e
+```
+Then the two models are:
+```{r}
+mod2 <- glm(y ~ X + I(X^2), family = gaussian)
+mod4 <- glm(y ~ X + I(X^2)+I(X^3)+I(X^4), family = gaussian)
+```
+We now can use and discuss two different assessing methods, AIC and ANOVA. Both will lead to the same model choice, in fact:
+```{r}
+anova(mod4)
+cat("\n AIC for lower order model: ", AIC(mod2), "\n AIC for higher order model: ", AIC(mod4))
+```
+From the anova analysis we can observe a huge drop of the residuals deviance when considering the higher order model `I(x^4)`, this should mean that this model better explains the data. Of course we see that the real drop is between the second and the third order, but in the case we need to decide between the second and the fourth then the fourth order polynomial model is better. The AIC comparison shows itself that the higher order model should be better because it's AIC is smaller.
+
+The things change in the second case. In fact, as request, if we try several times to build the model every time comparing the AIC, we see that the difference between the two values is pretty small, sometimes the simpler model AIC is even better. When in this case, the higher order is not able to better explain the data, then we should prefer the simpler quadratic model against the higher order one. In the following code we reproduced ten times the task requested, every time changing seed to evaluate the differences:
+```{r}
+for(i in 1:10){
+  set.seed(1233+i)
+  X <- runif(30, min=-4, max=4)
+  Y1 <- 0.5*X^3-20*X^2+0.5*X+20
+  e <- rnorm(30, mean = 0, sd=30)
+  y1 <- Y1 + e
+  mod2_1 <- glm(y1 ~ X + I(X^2), family = gaussian)
+  mod4_1 <- glm(y1 ~ X + I(X^2)+I(X^3)+I(X^4), family = gaussian)
+  cat("AIC for lower order model: ", AIC(mod2_1), " - AIC for higher order model: ", AIC(mod4_1), "\n")
+}
+```
+Let's evaluate (only in one case for simplicity and clearness) the anova table for this case:
+```{r}
+anova(mod4_1)
+```
+We see that the residual deviance does not significantly change when increasing the model parameters, hence a simpler model should be enough.
 
 ### Ex 7.20
 
