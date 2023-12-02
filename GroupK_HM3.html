@@ -2269,20 +2269,20 @@ summary(pois_fit)</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.9490  -0.8724  -0.2406   0.5482   2.5509  
+## -2.0604  -0.8293  -0.5313   0.5478   1.9644  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)   1.8271     0.1103   16.56   &lt;2e-16 ***
-## x            -3.1915     0.3119  -10.23   &lt;2e-16 ***
+## (Intercept)   1.9145     0.1119   17.11   &lt;2e-16 ***
+## x            -3.8726     0.3547  -10.92   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for poisson family taken to be 1)
 ## 
-##     Null deviance: 226.834  on 100  degrees of freedom
-## Residual deviance:  95.844  on  99  degrees of freedom
-## AIC: 290.93
+##     Null deviance: 248.514  on 100  degrees of freedom
+## Residual deviance:  86.143  on  99  degrees of freedom
+## AIC: 261.22
 ## 
 ## Number of Fisher Scoring iterations: 5</code></pre>
 <p>We can therefore see that the value obtained for the estimated
@@ -2313,22 +2313,22 @@ summary(pois_fit)</code></pre>
 ## 
 ## Deviance Residuals: 
 ##    Min      1Q  Median      3Q     Max  
-## -8.744  -5.174  -3.104   0.532  42.210  
+## -6.602  -6.390  -4.724  -2.833  75.827  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  0.88161    0.08444   10.44   &lt;2e-16 ***
-## x            2.76189    0.11257   24.54   &lt;2e-16 ***
+## (Intercept)  2.93359    0.04473  65.577   &lt;2e-16 ***
+## x            0.14801    0.07587   1.951   0.0511 .  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for poisson family taken to be 1)
 ## 
-##     Null deviance: 5402.0  on 100  degrees of freedom
-## Residual deviance: 4685.8  on  99  degrees of freedom
-## AIC: 4905.2
+##     Null deviance: 10146  on 100  degrees of freedom
+## Residual deviance: 10142  on  99  degrees of freedom
+## AIC: 10397
 ## 
-## Number of Fisher Scoring iterations: 7</code></pre>
+## Number of Fisher Scoring iterations: 8</code></pre>
 <pre class="r"><code>summary(quasipois_fit)</code></pre>
 <pre><code>## 
 ## Call:
@@ -2336,22 +2336,22 @@ summary(pois_fit)</code></pre>
 ## 
 ## Deviance Residuals: 
 ##    Min      1Q  Median      3Q     Max  
-## -8.744  -5.174  -3.104   0.532  42.210  
+## -6.602  -6.390  -4.724  -2.833  75.827  
 ## 
 ## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)   0.8816     0.9255   0.953   0.3431  
-## x             2.7619     1.2338   2.239   0.0274 *
+##             Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept)    2.934      1.065   2.756  0.00697 **
+## x              0.148      1.806   0.082  0.93483   
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## (Dispersion parameter for quasipoisson family taken to be 120.1352)
+## (Dispersion parameter for quasipoisson family taken to be 566.2634)
 ## 
-##     Null deviance: 5402.0  on 100  degrees of freedom
-## Residual deviance: 4685.8  on  99  degrees of freedom
+##     Null deviance: 10146  on 100  degrees of freedom
+## Residual deviance: 10142  on  99  degrees of freedom
 ## AIC: NA
 ## 
-## Number of Fisher Scoring iterations: 7</code></pre>
+## Number of Fisher Scoring iterations: 8</code></pre>
 <p>We can see that for both families the estimated values for the
 parameters are exactly the same just as we would expect since the
 estimating equations do not change from one to the other. However, the
