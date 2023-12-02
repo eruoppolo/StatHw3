@@ -221,6 +221,35 @@ Despite this, the coefficient $r=\hat\beta_1 \left(\frac{s_x}{s_y}\right)$ remai
 
 **Solution**
 
+```{r simulate}
+# simulate data
+X <- runif(100, min = 0, max = 10)
+e <- rnorm(100, mean = 0, sd = 1)
+Y <- 40.0 - 5.0*X + 0.5*X^2 + e
+plot(X, Y, main = "Simulated Data", xlab = "X", ylab = "Y")
+curve(40.0 - 5.0*x + 0.5*x^2, add = TRUE, col = "red")
+
+```
+```{r model}
+model <- lm(Y ~ poly(X, 2, raw = TRUE))
+summary(model)
+```
+
+
+```{r model plot}
+plot(X, model$fitted.values, main = "Fitted Values", xlab = "X", ylab = "Fitted Y")
+curve(40.0 - 5.0*x + 0.5*x^2, add = TRUE, col = "red")
+legend("top", legend = c("True Function", "Fitted Regression Function"), col = c("red", "black"), lty = c(1, 1), lwd = c(1, 1))
+```
+
+ b)
+```{r correlation}
+# correalation between x and y
+cor(X, Y)
+```
+
+The correlation is weak because the relationship between $x$ and $y$ is not linear, but quadratic. The $R^2$ value is large because the quadratic model fits the data well.
+
 ### Ex 6.52
 
 *$F$ statistics have alternate expressions in terms of $R^2$ values.*
@@ -421,6 +450,55 @@ So considering the AIC index, the most sensible choice appears to be the one inc
 *A headline in ``The Gainesville Sun (Feb. 17, 2014)`` proclaimed a worrisome spike in shark attacks in the previous two years. The reported total number of shark attacks in Florida per year from 2001 to 2013 were 33, 29, 29, 12, 17, 21, 31, 28, 19, 14, 11, 26, 23. Are these counts consistent with a null Poisson model? Explain, and compare aspects of the Poisson model and negative binomial model fits.*
 
 **Solution**
+
+```{r shark}
+
+shark_attacks <- c(33, 29, 29, 12, 17, 21, 31, 28, 19, 14, 11, 26, 23)
+
+# Plot she shark attacks
+plot(shark_attacks, main = "Shark Attacks", xlab = "Year", ylab = "Number of Attacks")
+
+
+
+```
+
+```{r mean and variance}
+# Calculate the mean
+mean_attacks <- mean(shark_attacks)
+
+# Calculate the variance
+var_attacks <- var(shark_attacks)
+
+# Print mean and variance
+cat("Mean:", mean_attacks, "\n")
+cat("Variance:", var_attacks, "\n")
+```
+
+As we can see, the variance is greater than the mean, so the data are overdispersed. Therefore we can't use a Poisson model. We can use a negative binomial model instead.
+
+```{r negative binomial}
+#import the glm.nb function
+library(MASS)
+
+# Fit a negative binomial model
+model <- glm.nb(shark_attacks ~ 1)
+
+# Print the summary
+summary(model)
+```
+
+To have a comparison, let's fit a Poisson model now.
+
+```{r poisson}
+# Fit a Poisson model
+model_poisson <- glm(shark_attacks ~ 1, family = poisson)
+
+# Print the summary
+summary(model_poisson)
+
+```
+
+As we can see, the estimated values of the intercept are the same, but the negative binomial model has a lower AIC and lower deviance, so it is a better fit. This could be motivated by the fact that the negative binomial model allows for overdispersion, which is present in the data.
 
 ## DAAG - Chapter 8
 
