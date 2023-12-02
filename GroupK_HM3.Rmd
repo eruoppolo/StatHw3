@@ -383,12 +383,8 @@ In this case we can say that none of the colors in the dataset show a statistica
 
 ```{r}
 # Confidence interval for weight effect
-coef_weight <- coef(main_model)["weight"]
-se_weight <- summary(main_model)$coefficients["weight", "Std. Error"]
-z_value <- qnorm(0.975)
-ci_lower <- coef_weight - z_value * se_weight
-ci_upper <- coef_weight + z_value * se_weight
-cat("Confidence Interval for the effect of weight: (", ci_lower, ",", ci_upper, ")\n")
+CI<-coef(main_model)[2] +c(-1,1) * summary(main_model)$coefficients[2,2] * qnorm(0.975)
+cat("Confidence Interval for the effect of weight: (", CI[1], ",", CI[2], ")\n")
 ```
 
 (b)
