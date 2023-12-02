@@ -517,7 +517,7 @@ and ``quasipoisson`` families differ?*
 
 (a) We can first simulate a sequence of 100 Poisson responses that respect the given model using the ``poissonsim()`` function in this way:
 
-```{r}
+```{r, include=FALSE}
 library(DAAG)
 x_sim <- seq(0.0,1.0,0.01)
 data_sim <- poissonsim(x_sim, 2, -4) 
@@ -533,9 +533,40 @@ pois_fit <- glm(y~x, family = poisson(link=log))
 summary(pois_fit)
 ```
 
-We can therefore see that the value obtained for the estimated parameters is very close to the actual ones, with a small standard error. The small p-values obtained for both the parameters also allow us to reject the hypothesis that the parameters are equal to zero.
+We can therefore see that the value obtained for the estimated parameters is very close to the actual ones, with a small standard error. The extremely small p-values obtained for both the parameters also allow us to reject the hypothesis that the parameters are equal to zero confirming the overall quality of the fit.\
+Additionally, since in the Poisson regression the parameters are estimated using the maximum likelihood method, we can verify that the estimated parameters follow a normal distribution around the expected values by repeating the simulation and the fitting process multiple times as shown below.
 
-*...I should add some comments on the deviances and AIC which is very high...*
+```{r}
+n_sim<-10^3
+a <- c()
+b <- c()
+
+for(i in 1:n_sim){
+  data_sim <- poissonsim(x_sim, 2, -4)
+  x <- data_sim[,1]
+  y <- data_sim[,2]
+  pois_fit <- glm(y~x, family = poisson(link=log))
+  a <- c(a, pois_fit$coefficients[1])
+  b <- c(b, pois_fit$coefficients[2])
+}
+
+{par(mfrow = c(1, 2))
+hist(a)
+hist(b)}
+```
+
+As expected the estimated parameters seems to be normally distributed around the correct values.\
+Finally, even if the AIC seems relatively high, we can check the residual plot to check the prediction capability of the fitted model.
+
+```{r}
+{plot(fitted(pois_fit), residuals(pois_fit), 
+     xlab = "Fitted Values", ylab = "Residuals",
+     main = "Residuals vs Fitted Values")
+
+abline(h = 0, col = "red", lty = 2)}
+```
+
+The residual plot obtained in this way highlights a possible problem in this simulation. Even if the mean of the residuals seems to correctly be around zero, the residuals are not completely randomly distributed: it is in fact possible to notice a pattern between the fitted values and the residuals that violates one of the key assumptions made while building these models. This is most probably related to the way in which the data are generated inside the ``poissonsim()`` function.
 
 (b) If the parameter b is now normally distributed with mean 4 and standard deviation 5 we can simulate the data in a similar way using the suggested argument for the ``poissonsim()`` function.
 
